@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=no">
+	<title>Editor example - Bootstrap 4</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.3/css/select.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/datetime/1.1.0/css/dataTables.dateTime.min.css">
+	<link rel="stylesheet" type="text/css" href="../../css/editor.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="../resources/syntax/shCore.css">
+	<link rel="stylesheet" type="text/css" href="../resources/demo.css">
+	<style type="text/css" class="init">
+
+	</style>
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.bootstrap4.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/datetime/1.1.0/js/dataTables.dateTime.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../../js/dataTables.editor.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../../js/editor.bootstrap4.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/syntax/shCore.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/demo.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/editor-demo.js"></script>
+	<script type="text/javascript" language="javascript" class="init">
+
+var editor; // use a global for the submit and return data rendering in the examples
+
+// Upload Editor - triggered from the import button. Used only for uploading a file to the browser
+var uploadEditor = new $.fn.dataTable.Editor( {
+		fields: [ {
+				label: 'CSV file:',
+				name: 'csv',
+				type: 'upload',
+				ajax: function ( files, done ) {
+						// Ajax override of the upload so we can handle the file locally. Here we use Papa
+						// to parse the CSV.
+						Papa.parse(files[0], {
+								header: true,
+								skipEmptyLines: true,
+								complete: function (results) {
+										if ( results.errors.length ) {
+												console.log( results );
+												uploadEditor.field('csv').error( 'CSV parsing error: '+ results.errors[0].message );
+										}
+										else {
+												selectColumns( editor, results.data, results.meta.fields );
+										}
+
+										// Tell Editor the upload is complete - the array is a list of file
+										// id's, which the value of doesn't matter in this case.
+										done([0]);
+								}
+						});
+				}
+		} ]
+} );
+
+$(document).ready(function() {
+	//Display editor
+	editor = new $.fn.dataTable.Editor( {
+		ajax: "../../controllers/staff.php",
+		table: "#example",
+		fields: [ {
+				label: "Email:",
+				name: "email"
+			}, {
+				label: "First name:",
+				name: "first_name"
+			}, {
+				label: "Last name:",
+				name: "last_name"
+			}, {
+				label: "Position:",
+				name: "position"
+			}, {
+				label: "Office:",
+				name: "office"
+			}, {
+				label: "Extension:",
+				name: "extn"
+			}, {
+				label: "Start date:",
+				name: "start_date",
+				type: 'datetime'
+			}, {
+				label: "Salary:",
+				name: "salary"
+			}
+		]
+	} );
+
+	// Edit record
+	$('#example').on('click', 'td.editor-edit', function (e) {
+			e.preventDefault();
+
+			editor.edit( $(this).closest('tr'), {
+					title: 'Edit record',
+					buttons: 'Update'
+			} );
+	} );
+
+	// Delete a record
+	$('#example').on('click', 'td.editor-delete', function (e) {
+			e.preventDefault();
+
+			editor.remove( $(this).closest('tr'), {
+					title: 'Delete record',
+					message: 'Are you sure you wish to remove this record?',
+					buttons: 'Delete'
+			} );
+	} );
+
+	//Display data in table
+	var table = $('#example').DataTable( {
+		lengthChange: true,
+		search: true,
+		ajax: "../../controllers/staff.php",
+		columns: [
+			{ data: "email" },
+			{ data: null, render: function ( data, type, row ) {
+				// Combine the first and last names into a single table field
+				return data.first_name+' '+data.last_name;
+			} },
+			{ data: "position" },
+			{ data: "office" },
+			{ data: "extn" },
+			{ data: "start_date" },
+			{ data: "salary", render: $.fn.dataTable.render.number( ',', '.', 0, '$' ) },
+			{
+			 	data: null,
+			 	className: "dt-center editor-edit",
+			  defaultContent: '<a><i class="fa fa-pencil"/></a>',
+				orderable: false
+			 },
+			 {
+			  data: null,
+			  className: "dt-center editor-delete",
+			  defaultContent: '<a><i class="fa fa-trash"/></a>',
+			  orderable: false
+			}
+		],
+	} );
+
+	// Display the buttons
+	new $.fn.dataTable.Buttons( table, [
+		{ extend: "create", editor: editor },
+		{
+	    extend: 'collection',
+	    text: 'Export',
+	    buttons:
+			[
+	   	'copy',
+	    'excel',
+	    'csv',
+	    'pdf',
+	    'print'
+	  	]
+	  },
+		{
+			text: 'Import CSV',
+			action: function () {
+				uploadEditor.create( {
+					title: 'CSV file import'
+				} );
+			}
+		},
+	] );
+
+	table.buttons().container()
+		.appendTo( $('.col-md-6:eq(0)', table.table().container() ) );
+} );
+
+
+
+	</script>
+</head>
+<body class="dt-example dt-example-bootstrap4">
+	<div class="container">
+		<section>
+			<div class="demo-html">
+				<table id="example" class="table responsive table-striped" style="width:100%">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Name</th>
+							<th>Position</th>
+							<th>Office</th>
+							<th>Extn.</th>
+							<th>Start date</th>
+							<th>Salary</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tfoot>
+						<tr>
+							<th>Name</th>
+							<th>Name</th>
+							<th>Position</th>
+							<th>Office</th>
+							<th>Extn.</th>
+							<th>Start date</th>
+							<th>Salary</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			</div>
+	</section>
+</body>
+</html>

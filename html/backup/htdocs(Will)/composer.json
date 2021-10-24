@@ -1,0 +1,13 @@
+{
+    "name": "aziz/marketing-campaign",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Aziz\\MarketingCampaign\\": "src/"
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^6.5",
+        "league/oauth2-google": "^4.0"
+    }
+}

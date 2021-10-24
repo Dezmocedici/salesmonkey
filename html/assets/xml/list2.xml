@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<root>
+    <item>
+        <seller>Yamaha</seller>
+        <id>4</id>
+        <name>YZF-R3</name>
+        <img>assets/img/r3.png</img>
+        <price>7670</price>
+    </item>
+</root>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="6b2aeba4-b478-4f0c-977e-fae24b2ec62d" name="Sales Monkey">
+        <fileTransfer accessType="SFTP" host="131.217.174.228" port="22" sshConfigId="331ed6d4-b851-480d-ac65-a05f0c57c507" sshConfig="ubuntu@131.217.174.228:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
